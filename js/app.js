@@ -1,10 +1,15 @@
 import HP from './helpers';
+import './jquery-change-size';
 
 (function ($) {
 
   // When DOM is ready
   $(function () {
     example(HP.random(10, 20));
+    $('.box').cropResize({
+      cnt: '.container'
+    });
+
   });
 
   /**
