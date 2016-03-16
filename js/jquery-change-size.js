@@ -35,6 +35,7 @@
         draggable: {}
       }, opts);
       this.$cnt = $(this.opts.cnt);
+      this.ratio = this.$el.width() / this.$el.height();
       this.init();
     }
 
@@ -74,8 +75,14 @@
             axis = $el.data('ui-resizable').axis,
             [top, left] = this._centeringResize(ui, axis);
 
-          if (ui.size.width < cntWidth) { ui.size.width = cntWidth; }
-          if (ui.size.height < cntHeight) { ui.size.height = cntHeight; }
+          if (ui.size.width < cntWidth) {
+            ui.size.width = cntWidth;
+            ui.size.height = cntWidth / this.ratio;
+          }
+          if (ui.size.height < cntHeight) {
+            ui.size.height = cntHeight;
+            ui.size.width = cntHeight * this.ratio;
+          }
           $el.width = function () { return ui.size.width; };
           $el.height = function () { return ui.size.height; };
           [left, top] = this._checkViewport(left, top, $el, this.$cnt);
