@@ -72,25 +72,12 @@
           var $el = $(ui.element),
             cntWidth = this.$cnt.width(),
             cntHeight = this.$cnt.height(),
-            axis = $el.data('ui-resizable').axis,
-            [top, left] = this._centeringResize(ui, axis);
+            [top, left] = this._centeringResize(ui);
 
-          if (ui.size.width < cntWidth) {
-            ui.size.width = cntWidth;
-            ui.size.height = cntWidth / this.ratio;
-          }
-          if (ui.size.height < cntHeight) {
-            ui.size.height = cntHeight;
-            ui.size.width = cntHeight * this.ratio;
-          }
           $el.width = function () { return ui.size.width; };
           $el.height = function () { return ui.size.height; };
           [left, top] = this._checkViewport(left, top, $el, this.$cnt);
-          [left, top] = this._stabilizeRatio(left, top, $el, this.$cnt);
-          $el.css({
-            'top': top,
-            'left': left
-          }).data('position', [top, left]);
+          [ui.position.left, ui.position.top] = this._stabilizeRatio(left, top, $el, this.$cnt, ui);
         }
       }, this.opts.resizable));
     }
@@ -148,15 +135,9 @@
      * @param  {String} axis - current axis of the resizable event
      * @return {Array} array with resulting numbers for left ant top position
      */
-    _centeringResize(ui, axis) {
-      var relation = {
-        se: ['plus', 'plus'],
-        ne: ['minus', 'plus'],
-        nw: ['minus', 'minus'],
-        sw: ['plus', 'minus']
-      }
-      var top = _operators[relation[axis][0]](parseInt(ui.position.top, 10), ((ui.originalSize.height - ui.size.height)) / 2);
-      var left = _operators[relation[axis][1]](parseInt(ui.position.left, 10), ((ui.originalSize.width - ui.size.width)) / 2);
+    _centeringResize(ui) {
+      var top = parseInt(ui.originalPosition.top, 10) + ((ui.originalSize.height - ui.size.height)) / 2;
+      var left = parseInt(ui.originalPosition.left, 10) + ((ui.originalSize.width - ui.size.width)) / 2;
       return [top, left];
     }
 
@@ -168,18 +149,23 @@
      * @param  {Object} $cnt - jQuery selection of the element container
      * @return {Array} - Array with stabilized left and top positions of the element
      */
-    _stabilizeRatio(left, top, $el, $cnt) {
-      if ($el.width() === $cnt.width()) {
+    _stabilizeRatio(left, top, $el, $cnt, ui) {
+      var cntWidth = $cnt.width(),
+        cntHeight = $cnt.height();
+      if (ui.size.width <= cntWidth) {
         left = 0;
-        top = $el.data('position')[0];
+        top = parseInt($el.css('top'), 10);
+        ui.size.width = cntWidth;
+        ui.size.height = ui.size.width / this.ratio;
       }
-      if ($el.height() === $cnt.height()) {
+      if (ui.size.height <= cntHeight) {
         top = 0;
-        left = $el.data('position')[1];
+        left = parseInt($el.css('left'), 10);
+        ui.size.height = cntHeight;
+        ui.size.width = ui.size.height * this.ratio;
       }
       return [left, top];
     }
-
   }
 
   /**

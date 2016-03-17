@@ -33,17 +33,20 @@ $media-expressions: (
 }
 
 .container {
-  width: 350px;
+  width: 200px;
   height: 100px;
   margin: 100px 300px;
   background: #000;
 }
 
 .box {
-  width: 400px;
-  height: 300px;
+  width: 300px;
+  height: 500px;
   background: #ff0000;
   opacity: 0.5;
+  position: relative;
+  top: 0;
+  left: 0;
 }
 
 .ui-resizable-handle {
