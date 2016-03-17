@@ -86,10 +86,11 @@
           $el.width = function () { return ui.size.width; };
           $el.height = function () { return ui.size.height; };
           [left, top] = this._checkViewport(left, top, $el, this.$cnt);
+          [left, top] = this._stabilizeRatio(left, top, $el, this.$cnt);
           $el.css({
             'top': top,
             'left': left
-          });
+          }).data('position', [top, left]);
         }
       }, this.opts.resizable));
     }
@@ -157,6 +158,26 @@
       var top = _operators[relation[axis][0]](parseInt(ui.position.top, 10), ((ui.originalSize.height - ui.size.height)) / 2);
       var left = _operators[relation[axis][1]](parseInt(ui.position.left, 10), ((ui.originalSize.width - ui.size.width)) / 2);
       return [top, left];
+    }
+
+    /**
+     * Stabilizing resizable image to keep apect ratio
+     * @param  {Number} left - new left position of element
+     * @param  {Number} top  - new top position of element
+     * @param  {Object} $el  - jQuery selection of the element
+     * @param  {Object} $cnt - jQuery selection of the element container
+     * @return {Array} - Array with stabilized left and top positions of the element
+     */
+    _stabilizeRatio(left, top, $el, $cnt) {
+      if ($el.width() === $cnt.width()) {
+        left = 0;
+        top = $el.data('position')[0];
+      }
+      if ($el.height() === $cnt.height()) {
+        top = 0;
+        left = $el.data('position')[1];
+      }
+      return [left, top];
     }
 
   }
