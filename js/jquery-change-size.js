@@ -2,20 +2,6 @@
 
   const pluginName = 'cropResize';
 
-  /**
-   * Simple math operations in the object representation
-   *   for create different math operations depending on variable
-   * @type {Object}
-   */
-  const _operators = {
-    plus: function (a, b) {
-      return a + b;
-    },
-    minus: function (a, b) {
-      return a - b;
-    }
-  }
-
   class Plugin {
 
     /**
@@ -72,12 +58,12 @@
           var $el = $(ui.element),
             cntWidth = this.$cnt.width(),
             cntHeight = this.$cnt.height(),
-            [top, left] = this._centeringResize(ui);
+            [top, left] = this._centeringResize(ui, cntWidth, cntHeight);
 
           $el.width = function () { return ui.size.width; };
           $el.height = function () { return ui.size.height; };
-          [left, top] = this._checkViewport(left, top, $el, this.$cnt);
-          [ui.position.left, ui.position.top] = this._stabilizeRatio(left, top, $el, this.$cnt, ui);
+          this._stabilizeRatio($el, this.$cnt, ui);
+          [ui.position.left, ui.position.top] = this._checkViewport(left, top, $el, this.$cnt);
         }
       }, this.opts.resizable));
     }
@@ -123,8 +109,8 @@
         cntHeight = $cnt.height();
       if (left > 0) { left = 0; }
       if (top > 0) { top = 0; }
-      if (Math.abs(left) > elWidth - cntWidth) { left = cntWidth - elWidth; }
-      if (Math.abs(top) > elHeight - cntHeight) { top = cntHeight - elHeight; }
+      if (Math.abs(left) >= elWidth - cntWidth) { left = cntWidth - elWidth; }
+      if (Math.abs(top) >= elHeight - cntHeight) { top = cntHeight - elHeight; }
       return [left, top];
     }
 
@@ -135,7 +121,10 @@
      * @param  {String} axis - current axis of the resizable event
      * @return {Array} array with resulting numbers for left ant top position
      */
-    _centeringResize(ui) {
+    _centeringResize(ui, cntWidth, cntHeight) {
+      if (ui.size.width <= cntWidth || ui.size.height <= cntHeight) {
+        return [ui.position.top, ui.position.left];
+      }
       var top = parseInt(ui.originalPosition.top, 10) + ((ui.originalSize.height - ui.size.height)) / 2;
       var left = parseInt(ui.originalPosition.left, 10) + ((ui.originalSize.width - ui.size.width)) / 2;
       return [top, left];
@@ -149,22 +138,21 @@
      * @param  {Object} $cnt - jQuery selection of the element container
      * @return {Array} - Array with stabilized left and top positions of the element
      */
-    _stabilizeRatio(left, top, $el, $cnt, ui) {
+    _stabilizeRatio($el, $cnt, ui) {
       var cntWidth = $cnt.width(),
         cntHeight = $cnt.height();
+
       if (ui.size.width <= cntWidth) {
-        left = 0;
-        top = parseInt($el.css('top'), 10);
+        ui.position.left = 0;
         ui.size.width = cntWidth;
         ui.size.height = ui.size.width / this.ratio;
       }
       if (ui.size.height <= cntHeight) {
-        top = 0;
-        left = parseInt($el.css('left'), 10);
+        ui.position.top = 0;
         ui.size.height = cntHeight;
         ui.size.width = ui.size.height * this.ratio;
       }
-      return [left, top];
+      return true;
     }
   }
 
